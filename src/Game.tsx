@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Board from './Board';
 import './Game.css';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 export default function Game(): JSX.Element {
     const [history, setHistory] = useState([Array(9).fill(null)]);
@@ -28,14 +29,23 @@ export default function Game(): JSX.Element {
         );
     });
 
+    const navigate = useNavigate();
+
     return (
-        <div className="game">
-        <div className="game-board">
-            <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
-        </div>
-        <div className="game-info">
-            <ol>{moves}</ol>
-        </div>
-        </div>
+        <>
+            <div className="game">
+                <div className="game-board">
+                    <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+                </div>
+                <div className="game-info">
+                    <ol>{moves}</ol>
+                </div>
+            </div>
+            <Link to="/help">
+                <button type="button">Help</button>
+            </Link>
+            <button type="button" onClick={() => navigate('/help')}>New Help</button>
+            <Outlet />
+        </>
     );
 }
