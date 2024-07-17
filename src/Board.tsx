@@ -1,7 +1,22 @@
 import Square from './Square';
-import { useContext } from 'react';
+import { Suspense, lazy, useContext } from 'react';
 import { AppContext } from './AppContext';
 import './Board.css';
+import Loading from './Loading';
+
+function Status({ winner, xIsNext }: Readonly<{ winner: string | null, xIsNext: boolean }>): JSX.Element {
+    if (winner) {
+        const Winner = lazy(() => import('./Winner'));
+        return (
+            <Suspense fallback={<Loading />}>
+                <Winner value={winner}></Winner>
+            </Suspense>
+        );
+    }
+
+    const next = xIsNext ? 'X' : 'O';
+    return <div className="status">Next player: {next}</div>;
+}
 
 export default function Board({ xIsNext, squares, onPlay }: Readonly<{ xIsNext: boolean, squares: Array<string | null>, onPlay: (nextSquares: Array<string | null>) => void }>): JSX.Element {
     const { 
@@ -22,12 +37,10 @@ export default function Board({ xIsNext, squares, onPlay }: Readonly<{ xIsNext: 
     }
   
     const winner: string | null = gameService.calculateWinner(squares);
-    const next = xIsNext ? 'X' : 'O';
-    const status = winner ? `Winner: ${winner}` : `Next player: ${next}`;
   
     return (
         <>
-            <div className="status">{status}</div>
+            <Status winner={winner} xIsNext={xIsNext}></Status>
             {Array.from({ length: 3 }, (_, y: number) => (
             <div className="board-row" key={y}>
                 {Array.from({ length: 3 }, (_, x: number) => {
