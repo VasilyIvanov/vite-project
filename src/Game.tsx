@@ -1,22 +1,32 @@
-import { useState } from 'react';
 import Board from './Board';
 import './Game.css';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from './hooks';
+import { set as setHistory, reset as resetHistory } from './historySlice';
+import { increment as incrementCurrentMove, set as setCurrentMove, reset as resetCurrentMove } from './currentMoveSlice';
 
 export default function Game(): JSX.Element {
-    const [history, setHistory] = useState([Array(9).fill(null)]);
-    const [currentMove, setCurrentMove] = useState(0);
+    const history = useAppSelector((state) => state.history.value);
+    const currentMove = useAppSelector((state) => state.currentMove.value);
+    const dispatch = useAppDispatch();
+
+    const navigate = useNavigate();
+
     const xIsNext = currentMove % 2 === 0;
     const currentSquares = history[currentMove];
 
     function handlePlay(nextSquares: Array<string | null>): void {
-        const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
-        setHistory(nextHistory);
-        setCurrentMove(nextHistory.length - 1);
+        dispatch(setHistory({ currentMove, nextSquares }));
+        dispatch(incrementCurrentMove());
     }
 
     function jumpTo(nextMove: number): void {
-        setCurrentMove(nextMove);
+        dispatch(setCurrentMove(nextMove));
+    }
+
+    function reset(): void {
+        dispatch(resetHistory());
+        dispatch(resetCurrentMove());
     }
 
     const moves: Array<JSX.Element> = history.map((_, move) => {
@@ -29,8 +39,6 @@ export default function Game(): JSX.Element {
         );
     });
 
-    const navigate = useNavigate();
-
     return (
         <>
             <div className="game">
@@ -41,6 +49,7 @@ export default function Game(): JSX.Element {
                     <ol>{moves}</ol>
                 </div>
             </div>
+            <button type="button" onClick={() => reset()}>Reset</button>
             <Link to="/help">
                 <button type="button">Help</button>
             </Link>
