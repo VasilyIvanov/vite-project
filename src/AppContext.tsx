@@ -1,6 +1,13 @@
 import { createContext } from 'react';
 import GameService from './GameService';
 
+const myWorker = new SharedWorker(new URL('./worker/shared-worker.ts', import.meta.url));
+myWorker.port.onmessage = (e: MessageEvent) => {
+    console.log("Message received from worker", e);
+};
+myWorker.port.postMessage([3, 7]);
+console.log("Message posted to worker");
+
 const services = {
     gameService: new GameService()
 };
